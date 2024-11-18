@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Héroes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%);
+            --secondary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --accent-color: #818cf8;
+            --surface-color: rgba(30, 41, 59, 0.95);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+        }
+
+        body {
+            background: var(--secondary-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: var(--surface-color);
+            border-radius: 24px;
+            padding: 32px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 1200px;
+            margin: 2rem auto;
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 2.75rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -1px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .table {
+            color: var(--text-primary);
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-top: 24px;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        .table th {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 16px;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            padding: 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.95rem;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .table img {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            object-fit: cover;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .table img:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .container-form {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .container-form.active {
+            display: flex;
+            opacity: 1;
+            animation: modalFadeIn 0.4s ease-out forwards;
+        }
+
+        .form-container {
+            background: var(--surface-color);
+            padding: 2.5rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 560px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            opacity: 0;
+            animation: formScaleIn 0.4s ease-out 0.2s forwards;
+        }
+
+        .form-control {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border-radius: 12px;
+            padding: 14px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .actions-column {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-primary);
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-edit {
+            background: rgba(234, 179, 8, 0.2);
+            color: #fbbf24;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        @keyframes modalFadeIn {
+            from { 
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to { 
+                opacity: 1;
+                backdrop-filter: blur(8px);
+            }
+        }
+
+        @keyframes formScaleIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 1rem;
+                border-radius: 16px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+
+            .table {
+                font-size: 0.9rem;
+            }
+
+            .table th, .table td {
+                padding: 12px;
+            }
+
+            .form-container {
+                margin: 20px;
+                padding: 1.5rem;
+            }
+
+            .btn-primary {
+                padding: 10px 20px;
+            }
+        }
+
+        /* Personalización del scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container animate__animated animate__fadeIn">
+        <h1>Gestión de Héroes</h1>
+        
+        <div class="d-flex justify-content-end mb-4">
+            <button id="btn-add" class="btn btn-primary animate__animated animate__bounceIn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Agregar Héroe
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table id="tabla-H" class="table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Edad</th>
+                        <th>Ciudad</th>
+                        <th>Imagen</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-h">
+                    <!-- Contenido dinámico -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="container-form" class="container-form">
+        <div class="form-container">
+            <h2 class="mb-4 text-center" style="color: var(--text-primary); font-weight: 700;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M20 7h-7L10 3H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path>
+                </svg>
+                Datos del Héroe
+            </h2>
+            <form id="hero-form">
+                <div class="mb-3">
+                    <label for="codigo" class="form-label">Código</label>
+                    <input type="number" class="form-control" id="codigo" required>
+                </div>
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" required>
+                </div>
+                <div class="mb-3">
+                    <label for="edad" class="form-label">Edad</label>
+                    <input type="number" class="form-control" id="edad" required>
+                </div>
+                <div class="mb-3">
+                    <label for="ciudad" class="form-label">Ciudad</label>
+                    <input type="text" class="form-control" id="ciudad" required>
+                </div>
+                <div class="mb-3">
+                    <label for="urlImagen" class="form-label">URL de la Imagen</label>
+                    <input type="text" class="form-control" id="urlImagen" required>
+                </div>
+                <div class="d-flex justify-content-end gap-3 mt-4">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('container-form').classList.remove('active')">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="btn">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="./src/main.ts"></script>
+</body>
+</html>
